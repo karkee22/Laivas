@@ -4,108 +4,83 @@
 #include <conio.h>
 #include <cstdlib>
 #include <windows.h>
+#include "log.h"
 
 using namespace std;
-
-int y, x2, y2;
-char x;
-bool gameover;
-enum eDirection { LEFT, RIGHT, UP, DOWN };
-eDirection dir;
-void input()
-{
-	switch (_getch())
-	{
-	case 'a':
-		dir = LEFT;
-		break;
-	case 'd':
-		dir = RIGHT;
-		break;
-	case 'w':
-		dir = UP;
-		break;
-	case 's':
-		dir = DOWN;
-		break;
-	}
-}
-
-void put()
-{
-	switch (dir)
-	{
-	case LEFT:
-		x--;
-		break;
-	case RIGHT:
-		x++;
-		break;
-	case UP:
-		y--;
-		break;
-	case DOWN:
-		y++;
-		break;
-	}
-}
 
 class lentac;
 
 class laivas
 {
 protected:
+	int numustilaivai = 0;
 	vector <int> length{ 4, 3, 2, 2, 1, 1, 1, 1 };
 	vector <vector <int>> boatrow;
 	vector <vector <int>> boatcol;
 public:
+	void operator++()
+	{
+		++numustilaivai;
+	}
+	int gautilaivus() { return numustilaivai; }
 	bool statytil(int i)
 	{
-			int lth = length.at(i);
-			vector <int> brow;
-			vector <int> bcol;
-			cout << "Iveskite " << lth << " dydzio laivo priekio koordinates" << endl;
-			cin >> x >> y;
-			cout << "Iveskite krypti, kuria statysit laiva" << endl;
-			input();
-			system("cls");
-			while (lth > brow.size())
+		int lth = length.at(i);
+		vector <int> brow;
+		vector <int> bcol;
+		cout << "Iveskite " << lth << " dydzio laivo priekio koordinates" << endl;
+		cin >> x >> y;
+		cout << "Iveskite krypti, kuria statysit laiva" << endl;
+		input();
+		system("cls");
+		while (lth > brow.size())
+		{
+			if ((9 - ('j' - x) <= 9) && (9 - ('j' - x) >= 0))
+				bcol.push_back(9 - ('j' - x));
+			else
 			{
-				if ((9 - ('j' - x) <= 9) && (9 - ('j' - x) >= 0))
-					bcol.push_back(9 - ('j' - x));
-				else
-				{
-					bcol.clear();
-					brow.clear();
-					x = ' ';
-					return 0;
-					break;
-				}
-				if ((y <= 9) && (y >= 0))
-					brow.push_back(y);
-				else
-				{
-					y = -1;
-					bcol.clear();
-					brow.clear();
-					return 0;
-					break;
-				}
-				put();
+				bcol.clear();
+				brow.clear();
+				x = ' ';
+				return 0;
+				break;
 			}
-			length.at(i) = lth;
-			boatrow.push_back(brow);
-			boatcol.push_back(bcol);
-			return 1;
+			if ((y <= 9) && (y >= 0))
+				brow.push_back(y);
+			else
+			{
+				y = -1;
+				bcol.clear();
+				brow.clear();
+				return 0;
+				break;
+			}
+			put();
+		}
+		length.at(i) = lth;
+		boatrow.push_back(brow);
+		boatcol.push_back(bcol);
+		return 1;
 	}
 };
+
 
 class lenta : public laivas
 {
 private:
-	int board[10][10];	
+	int board[10][10];
 public:
-	lenta() { }
+	lenta() {}
+	lenta(int brd[10][10]) 
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			for (int j = 0; j < 10; j++)
+			{
+				board[i][j] = brd[i][j];
+			}
+		}
+	}
 	~lenta() {}
 	int gautiboard(int xx, int yy) { return board[xx][yy]; }
 	void keistiboard(int xx, int yy) { board[xx][yy] = 9; }
@@ -669,7 +644,8 @@ void atakac(lentac *lentc, lenta *lent, int *duc, int *trysc, int *keturic, int 
 
 int main()
 {
-	lenta lent;
+	int zaidimulenta[10][10]{ 0 };
+	lenta lent(zaidimulenta);
 	lentac lentc;
 	int i = 0, du = 0, trys = 0, keturi = 0, sunaikintip = 0, sunaikintic = 0, duc = 0, trysc = 0, keturic = 0, laik = -1, xc = 0, yc=0;
 	char kryptis;
@@ -727,8 +703,9 @@ int main()
 	while (!gameover)
 	{
 		ataka(&lentc, &lent, &du, &trys, &keturi, &sunaikintip);
-		if (sunaikintip == 8)
+		if (lent.gautilaivus() == 8)
 		{
+			lent.~lenta();
 			cout << "Jus laimejote!";
 			Sleep(3000);
 			break;
@@ -775,7 +752,7 @@ void ataka(lentac *lentc, lenta *lent, int *du, int *trys, int *keturi, int *sun
 		cout << endl;
 		lent->showboard();
 		cout << "Jus sunaikinote laiva!" << endl;
-		*sunaikintip = *sunaikintip + 1;
+		++*lent;
 		Sleep(2000);
 	}
 	else if (lentc->gautiboardc(atty, attx) == 2)
@@ -790,7 +767,7 @@ void ataka(lentac *lentc, lenta *lent, int *du, int *trys, int *keturi, int *sun
 			cout << endl;
 			lent->showboard();
 			cout << "Jus sunaikinote laiva!" << endl;
-			*sunaikintip = *sunaikintip + 1;
+			++*lent;
 			Sleep(2000);
 		}
 		else
@@ -816,7 +793,7 @@ void ataka(lentac *lentc, lenta *lent, int *du, int *trys, int *keturi, int *sun
 			cout << endl;
 			lent->showboard();
 			cout << "Jus sunaikinote laiva!" << endl;
-			*sunaikintip = *sunaikintip + 1;
+			++*lent;
 			Sleep(2000);
 		}
 		else
@@ -841,7 +818,7 @@ void ataka(lentac *lentc, lenta *lent, int *du, int *trys, int *keturi, int *sun
 			cout << endl;
 			lent->showboard();
 			cout << "Jus sunaikinote laiva!" << endl;
-			*sunaikintip = *sunaikintip + 1;
+			++*lent;
 			Sleep(2000);
 		}
 		else
