@@ -1,0 +1,4 @@
+﻿  Source.cpp
+c:\users\grauk\desktop\objectinis programavimas\laivų mūšis\project1\source.cpp(72): warning C4018: '>': signed/unsigned mismatch
+c:\users\grauk\desktop\objectinis programavimas\laivų mūšis\project1\source.cpp(205): warning C4018: '>': signed/unsigned mismatch
+  Project1.vcxproj -> C:\Users\grauk\Desktop\Objectinis programavimas\Laivų mūšis\Debug\Project1.exe
